@@ -57,4 +57,85 @@ class PotionController extends Controller
         Potion::destroy($id);
         return response()->json(['message' => 'Potion deleted']);
     }
+
+    //Get the highest level required potions 
+    public function highestLevelRequired()
+    {
+        $maxLevel = Potion::max('magic_level_required');
+        $potion = Potion::where('magic_level_required', $maxLevel)->get();
+
+        if($potion -> isEmpty())
+        {
+            return response()->json(['message'=>'No potions found']);
+        }
+
+        return response()->json($potion,200);
+    }
+
+    //Get the lowest level required potions 
+    public function lowestLevelRequired()
+    {
+        $minLevel = Potion::min('magic_level_required');
+        $potion = Potion::where('magic_level_required', $minLevel)->get();
+
+        if($potion -> isEmpty())
+        {
+            return response()->json(['message'=>'No potions found']);
+        }
+
+        return response()->json($potion,200);
+    }
+
+    //Get the curative potions 
+    public function getCurativePotions()
+    {
+        $curativePotions = Potion::where('curative',true)->get();
+
+        if($curativePotions -> isEmpty())
+        {
+            return response()->json(['message'=>'No potions found']);
+        }
+
+        return response()->json($curativePotions,200);
+    }
+
+    //Get potions by required level
+    public function getPotionsByRequiredLevel($level)
+    {
+        $potions = Potion::where('magic_level_required', $level)->get();
+
+        if($potions -> isEmpty())
+        {
+            return response()->json(['message'=>'No potions found']);
+        }
+
+        return response()->json($potions,200);
+    }
+
+    //Get potion by name
+    public function getPotionByName(Request $request)
+    {
+        $name = $request->query('q');
+
+        $potion = Potion::where('magical_name','ILIKE', "%$name%")->get();
+
+        if($potion -> isEmpty())
+        {
+            return response()->json(['message'=>'No potions found']);
+        }
+
+        return response()->json($potion,200);
+    }
+
+    //Get stats
+    public function getStats()
+    {
+        return response()->json([
+            'total'=>Potion::count(),
+            'curative'=>Potion::where('curative',true)->count(),
+            'nonCurative'=>Potion::where('curative',false)->count(),
+            'avg_magic_level'=>round(Potion::avg('magic_level_required'), 2)
+        ], 200);
+    }
+
 }
